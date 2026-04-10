@@ -70,8 +70,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack); // logs full error in server console
   res.status(err.status || 500).json({ msg: err.message || "Server error" });
 });
-const port = process.env.PORT || 3000;
-app.listen(port, '0.0.0.0', () => console.log(`Server running on port ${port}`));
+
 
 const categories = [
   { name: "Men", query: { category: /men/i } },
