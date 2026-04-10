@@ -1,132 +1,155 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
+const Product = require("../models/product");
 
-/* GET home page. */
-router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-const Product = require('../models/product');
-
-router.get('/api/products', async (req, res) => {
+// --- API Endpoints ---
+// GET all products
+router.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find({});
     res.json(products);
   } catch (err) {
-    console.error("❌ Error fetching products:", err); // <-- This prints the real error in terminal
+    console.error("❌ Error fetching products:", err);
     res.status(500).json({ message: "Server Error", error: err });
   }
 });
 
-
-router.get('/api/men', async (req, res) => {
+// GET Men products
+router.get("/api/men", async (req, res) => {
   try {
-    const Menproducts = await Product.find({category: /Men/i});
-    
-    // Add subCategory if it doesn't exist (for backward compatibility with old data)
-    const enrichedProducts = Menproducts.map(product => {
-      const productObj = product.toObject ? product.toObject() : product;
-      
-      if (!productObj.subCategory) {
-        const name = productObj.name.toLowerCase();
-        const desc = productObj.description ? productObj.description.toLowerCase() : '';
-        
-        // Smart categorization based on product name and description
-        if (name.includes('t-shirt') || name.includes('tshirt') || desc.includes('t-shirt') || desc.includes('tshirt')) {
-          productObj.subCategory = 'T-Shirts';
-        } else if (name.includes('jeans') || desc.includes('jeans')) {
-          productObj.subCategory = 'Jeans';
-        } else if (name.includes('shorts') || desc.includes('shorts')) {
-          productObj.subCategory = 'Shorts';
-        } else if (name.includes('pants') || name.includes('pant') || desc.includes('pants') || desc.includes('pant')) {
-          productObj.subCategory = 'Pants';
-        } else if (name.includes('shirt') || desc.includes('shirt')) {
-          productObj.subCategory = 'Shirts';
-        } else {
-          productObj.subCategory = 'Shirts';
-        }
-      }
-      
-      return productObj;
+    const allProducts = await Product.find({}); // fetch all products
+
+    // Filter only names starting with "Men", "Men's", or "Mens"
+    const menProducts = allProducts.filter((p) => {
+      const name = (p.name || "").trim().toLowerCase();
+
+      return (
+        name.startsWith("men ") || // Men T-Shirt
+        name.startsWith("men's ") || // Men's Kurta
+        name.startsWith("mens ") // Mens Pants
+      );
     });
-    
-    res.json(enrichedProducts);
+
+    // Assign subCategory if missing
+    const enriched = menProducts.map((p) => {
+      const obj = p.toObject ? p.toObject() : p;
+
+      if (!obj.subCategory) {
+        const name = (obj.name || "").toLowerCase();
+        const desc = (obj.description || "").toLowerCase();
+
+        if (name.includes("t-shirt") || desc.includes("t-shirt"))
+          obj.subCategory = "T-Shirt";
+        else if (name.includes("jeans") || desc.includes("jeans"))
+          obj.subCategory = "Jeans";
+        else if (name.includes("shorts") || desc.includes("shorts"))
+          obj.subCategory = "Shorts";
+        else if (name.includes("shirt") || desc.includes("shirt"))
+          obj.subCategory = "Shirt";
+        else if (name.includes("pant") || desc.includes("pant"))
+          obj.subCategory = "Pants";
+        else obj.subCategory = "Shirts"; // fallback
+      }
+
+      return obj;
+    });
+
+    res.json(enriched);
   } catch (err) {
-    console.error("❌ Error fetching men products:", err);
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err });
+  }
+});
+
+// GET Women products
+router.get("/api/women", async (req, res) => {
+  try {
+    const womenProducts = await Product.find({ category: /Women/i });
+    const enriched = womenProducts.map((p) => {
+      const obj = p.toObject ? p.toObject() : p;
+      if (!obj.subCategory) {
+        const name = obj.name.toLowerCase();
+        const desc = (obj.description || "").toLowerCase();
+        if (name.includes("t-shirt") || desc.includes("t-shirt"))
+          obj.subCategory = "T-Shirts";
+        else if (name.includes("jeans") || desc.includes("jeans"))
+          obj.subCategory = "Jeans";
+        else if (name.includes("shorts") || desc.includes("shorts"))
+          obj.subCategory = "Shorts";
+        else if (name.includes("dress") || desc.includes("dress"))
+          obj.subCategory = "Dresses";
+        else if (name.includes("pants") || desc.includes("pants"))
+          obj.subCategory = "Pants";
+        else if (name.includes("shirt") || desc.includes("shirt"))
+          obj.subCategory = "Shirts";
+        else obj.subCategory = "Shirts";
+      }
+      return obj;
+    });
+    res.json(enriched);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server Error", error: err });
   }
 });
 
-router.get('/api/women', async (req, res) => {
+// GET Kids products
+router.get("/api/kids", async (req, res) => {
   try {
-    const Womenproducts = await Product.find({category: /Women/i});
-    
-    // Add subCategory if it doesn't exist
-    const enrichedProducts = Womenproducts.map(product => {
-      const productObj = product.toObject ? product.toObject() : product;
-      
-      if (!productObj.subCategory) {
-        const name = productObj.name.toLowerCase();
-        const desc = productObj.description ? productObj.description.toLowerCase() : '';
-        
-        if (name.includes('t-shirt') || name.includes('tshirt') || desc.includes('t-shirt') || desc.includes('tshirt')) {
-          productObj.subCategory = 'T-Shirts';
-        } else if (name.includes('jeans') || desc.includes('jeans')) {
-          productObj.subCategory = 'Jeans';
-        } else if (name.includes('shorts') || desc.includes('shorts')) {
-          productObj.subCategory = 'Shorts';
-        } else if (name.includes('dress') || desc.includes('dress')) {
-          productObj.subCategory = 'Dresses';
-        } else if (name.includes('pants') || name.includes('pant') || desc.includes('pants') || desc.includes('pant')) {
-          productObj.subCategory = 'Pants';
-        } else if (name.includes('shirt') || desc.includes('shirt')) {
-          productObj.subCategory = 'Shirts';
-        } else {
-          productObj.subCategory = 'Shirts';
-        }
+    const kidsProducts = await Product.find({ category: /Kids/i });
+    const enriched = kidsProducts.map((p) => {
+      const obj = p.toObject ? p.toObject() : p;
+      if (!obj.subCategory) {
+        const name = obj.name.toLowerCase();
+        const desc = (obj.description || "").toLowerCase();
+        if (name.includes("t-shirt") || desc.includes("t-shirt"))
+          obj.subCategory = "T-Shirts";
+        else if (name.includes("shorts") || desc.includes("shorts"))
+          obj.subCategory = "Shorts";
+        else if (name.includes("pants") || desc.includes("pants"))
+          obj.subCategory = "Pants";
+        else if (name.includes("shirt") || desc.includes("shirt"))
+          obj.subCategory = "Shirts";
+        else obj.subCategory = "Shirts";
       }
-      
-      return productObj;
+      return obj;
     });
-    
-    res.json(enrichedProducts);
+    res.json(enriched);
   } catch (err) {
-    console.error("❌ Error fetching women products:", err);
+    console.error(err);
     res.status(500).json({ message: "Server Error", error: err });
   }
 });
 
-router.get('/api/kids', async (req, res) => {
+// GET Beauty products
+router.get("/api/beauty", async (req, res) => {
   try {
-    const Kidsproducts = await Product.find({category: /Kids/i});
-    
-    // Add subCategory if it doesn't exist
-    const enrichedProducts = Kidsproducts.map(product => {
-      const productObj = product.toObject ? product.toObject() : product;
-      
-      if (!productObj.subCategory) {
-        const name = productObj.name.toLowerCase();
-        const desc = productObj.description ? productObj.description.toLowerCase() : '';
-        
-        if (name.includes('t-shirt') || name.includes('tshirt') || desc.includes('t-shirt') || desc.includes('tshirt')) {
-          productObj.subCategory = 'T-Shirts';
-        } else if (name.includes('shorts') || desc.includes('shorts')) {
-          productObj.subCategory = 'Shorts';
-        } else if (name.includes('pants') || name.includes('pant') || desc.includes('pants') || desc.includes('pant')) {
-          productObj.subCategory = 'Pants';
-        } else if (name.includes('shirt') || desc.includes('shirt')) {
-          productObj.subCategory = 'Shirts';
-        } else {
-          productObj.subCategory = 'Shirts';
-        }
-      }
-      
-      return productObj;
-    });
-    
-    res.json(enrichedProducts);
+    const beautyProducts = await Product.find({ category: "Beauty" });
+    res.json(beautyProducts);
   } catch (err) {
-    console.error("❌ Error fetching kids products:", err);
+    console.error(err);
+    res.status(500).json({ message: "Server Error", error: err });
+  }
+});
+
+// GET Home products
+router.get("/api/home", async (req, res) => {
+  try {
+    const homeProducts = await Product.find({ category: "Home" });
+    res.json(homeProducts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error", error: err });
+  }
+});
+
+// GET Electronics products
+router.get("/api/electronics", async (req, res) => {
+  try {
+    const electronics = await Product.find({ category: "Electronics" });
+    res.json(electronics);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server Error", error: err });
   }
 });
