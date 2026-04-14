@@ -25,8 +25,7 @@ app.use(
       "https://e-commercewebsite-git-main-ahana-awasthis-projects.vercel.app",
       "https://e-commerce-website-backend-d84m.onrender.com",
       "https://e-commercewebsite-cvqm2ba55-ahana-awasthis-projects.vercel.app",
-      "https://e-commercewebsite-wheat.vercel.app",
-
+      "https://shopora-ecommerce.vercel.app/",
     ],
     credentials: true,
   }),
