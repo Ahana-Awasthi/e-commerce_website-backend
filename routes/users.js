@@ -289,8 +289,17 @@ router.post("/login", async (req, res) => {
     }
     // if Google login, skip password check
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+    });
+
+    res.json({
+      token: accessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
 
     res.json({
@@ -641,7 +650,7 @@ router.post("/google-login", async (req, res) => {
 
     // Generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1y",
     });
 
     console.log(`✅ Google login successful for ${email}`);
@@ -690,7 +699,7 @@ router.post("/google-register", async (req, res) => {
 
     // Generate token
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1y",
     });
 
     console.log(`✅ Google sign-up successful for ${email}`);
