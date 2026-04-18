@@ -28,7 +28,7 @@ app.use(
       "https://shopora-ecommerce.vercel.app",
     ],
     credentials: true,
-  }),
+  }), 
 );
 // --- Serve Images ---
 app.use("/images", express.static(path.join(__dirname, "public/images")));
