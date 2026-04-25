@@ -640,7 +640,7 @@ router.post("/google-login", async (req, res) => {
       return res.status(400).json({ msg: "Email required" });
     }
 
-    // Find user by email
+    // Find user by email 
     const user = await User.findOne({ email });
     if (!user) {
       return res
