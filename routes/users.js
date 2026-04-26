@@ -35,6 +35,7 @@ const getOrderStatus = (createdAt) => {
 
 // Register
 router.post("/register", async (req, res) => {
+    console.log("📦 REGISTER BODY:", req.body);
   const { name, email, password, phone, address } = req.body;
   try {
     const existingUser = await User.findOne({ email });
@@ -45,7 +46,8 @@ router.post("/register", async (req, res) => {
     await user.save();
     res.status(201).json({ msg: "User created successfully" });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    console.error("❌ REGISTER ERROR:", err);
+    res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
 // Get user's wishlist

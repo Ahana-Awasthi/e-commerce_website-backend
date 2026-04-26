@@ -17,6 +17,11 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  next();
+});
 app.use(
   cors({
     origin: [
@@ -28,7 +33,7 @@ app.use(
       "https://shopora-ecommerce.vercel.app",
     ],
     credentials: true,
-  }), 
+  }),
 );
 // --- Serve Images ---
 app.use("/images", express.static(path.join(__dirname, "public/images")));
@@ -84,7 +89,6 @@ app.use((err, req, res, next) => {
   console.error(err.stack); // logs full error in server console
   res.status(err.status || 500).json({ msg: err.message || "Server error" });
 });
-
 
 const categories = [
   { name: "Men", query: { category: /men/i } },
